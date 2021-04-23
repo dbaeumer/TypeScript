@@ -480,8 +480,10 @@ namespace Harness.LanguageService {
         getCompletionEntrySymbol(): ts.Symbol {
             throw new Error("getCompletionEntrySymbol not implemented across the shim layer.");
         }
-        getQuickInfoAtPosition(fileName: string, position: number): ts.QuickInfo {
-            return unwrapJSONCallResult(this.shim.getQuickInfoAtPosition(fileName, position));
+        getQuickInfoAtPosition(filename: string, position: number): ts.QuickInfo | undefined;
+        getQuickInfoAtPosition(node: ts.Node, sourceFile: ts.SourceFile | undefined): ts.QuickInfo | undefined;
+        getQuickInfoAtPosition(arg0: string | ts.Node, arg1: number | ts.SourceFile | undefined): ts.QuickInfo | undefined {
+            return unwrapJSONCallResult(this.shim.getQuickInfoAtPosition(arg0 as any, arg1 as any));
         }
         getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): ts.TextSpan {
             return unwrapJSONCallResult(this.shim.getNameOrDottedNameSpan(fileName, startPos, endPos));
@@ -537,8 +539,8 @@ namespace Harness.LanguageService {
         getNavigationTree(fileName: string): ts.NavigationTree {
             return unwrapJSONCallResult(this.shim.getNavigationTree(fileName));
         }
-        getOutliningSpans(fileName: string): ts.OutliningSpan[] {
-            return unwrapJSONCallResult(this.shim.getOutliningSpans(fileName));
+        getOutliningSpans(arg0: string | ts.SourceFile): ts.OutliningSpan[] {
+            return unwrapJSONCallResult(this.shim.getOutliningSpans(arg0 as any));
         }
         getTodoComments(fileName: string, descriptors: ts.TodoCommentDescriptor[]): ts.TodoComment[] {
             return unwrapJSONCallResult(this.shim.getTodoComments(fileName, JSON.stringify(descriptors)));
