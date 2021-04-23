@@ -163,7 +163,11 @@ namespace ts.server {
             return { line, character: offset };
         }
 
-        getQuickInfoAtPosition(fileName: string, position: number): QuickInfo {
+        getQuickInfoAtPosition(fileName: string, position: number): QuickInfo;
+        getQuickInfoAtPosition(node: ts.Node, sourceFile?: ts.SourceFile): QuickInfo;
+        getQuickInfoAtPosition(arg0: string | ts.Node, arg1: number | ts.SourceFile | undefined): QuickInfo {
+            const fileName = typeof arg0 === "string" ? arg0 : arg1 !== undefined ? (arg1 as ts.SourceFile).fileName : arg0.getSourceFile().fileName;
+            const position = typeof arg0 === "string" ? arg1 as number : arg0.getStart(arg1 as ts.SourceFile);
             const args = this.createFileLocationRequestArgs(fileName, position);
 
             const request = this.processRequest<protocol.QuickInfoRequest>(CommandNames.Quickinfo, args);
@@ -574,7 +578,10 @@ namespace ts.server {
             }));
         }
 
-        getOutliningSpans(file: string): OutliningSpan[] {
+        getOutliningSpans(file: string): OutliningSpan[];
+        getOutliningSpans(sourceFile: ts.SourceFile): OutliningSpan[];
+        getOutliningSpans(arg0: string | ts.SourceFile): OutliningSpan[] {
+            const file = typeof arg0 === "string" ? arg0 : arg0.fileName;
             const request = this.processRequest<protocol.OutliningSpansRequest>(CommandNames.GetOutliningSpans, { file });
             const response = this.processResponse<protocol.OutliningSpansResponse>(request);
 

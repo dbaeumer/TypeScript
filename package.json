@@ -2,7 +2,7 @@
     "name": "typescript",
     "author": "Microsoft Corp.",
     "homepage": "https://www.typescriptlang.org/",
-    "version": "4.1.3",
+    "version": "4.1.3-lsif.1",
     "license": "Apache-2.0",
     "description": "TypeScript is a language for application scale JavaScript development",
     "keywords": [
@@ -128,6 +128,5 @@
         "@microsoft/typescript-etw": false,
         "source-map-support": false,
         "inspector": false
-    },
-    "dependencies": {}
+    }
 }
