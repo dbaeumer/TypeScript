@@ -2185,7 +2185,20 @@ declare namespace ts {
         diagnostics: readonly Diagnostic[];
         emittedFiles?: string[];
     }
+    export interface SymbolChainCacheKey {
+        symbol: Symbol;
+        enclosingDeclaration?: Node;
+        flags: NodeBuilderFlags;
+        meaning: SymbolFlags;
+        yieldModuleSymbol?: boolean;
+        endOfChain: boolean;
+    }
+    export interface SymbolChainCache {
+        lookup(key: SymbolChainCacheKey): Symbol[] | undefined;
+        cache(key: SymbolChainCacheKey, value: Symbol[]): void;
+    }
     export interface TypeChecker {
+        setSymbolChainCache(cache: SymbolChainCache | undefined): void;
         getTypeOfSymbolAtLocation(symbol: Symbol, node: Node): Type;
         getDeclaredTypeOfSymbol(symbol: Symbol): Type;
         getPropertiesOfType(type: Type): Symbol[];
@@ -5240,6 +5253,7 @@ declare namespace ts {
          * writeFileCallback
          */
         writeFile?(path: string, data: string, writeByteOrderMark?: boolean): void;
+        getCustomTransformers?: (project: string) => CustomTransformers | undefined;
         getModifiedTime(fileName: string): Date | undefined;
         setModifiedTime(fileName: string, date: Date): void;
         deleteFile(fileName: string): void;
@@ -5651,6 +5665,7 @@ declare namespace ts {
          * @param position A zero-based index of the character where you want the quick info
          */
         getQuickInfoAtPosition(fileName: string, position: number): QuickInfo | undefined;
+        getQuickInfoAtPosition(node: ts.Node, sourceFile?: ts.SourceFile): QuickInfo | undefined;
         getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): TextSpan | undefined;
         getBreakpointStatementAtPosition(fileName: string, position: number): TextSpan | undefined;
         getSignatureHelpItems(fileName: string, position: number, options: SignatureHelpItemsOptions | undefined): SignatureHelpItems | undefined;
@@ -5674,6 +5689,7 @@ declare namespace ts {
         provideCallHierarchyIncomingCalls(fileName: string, position: number): CallHierarchyIncomingCall[];
         provideCallHierarchyOutgoingCalls(fileName: string, position: number): CallHierarchyOutgoingCall[];
         getOutliningSpans(fileName: string): OutliningSpan[];
+        getOutliningSpans(sourceFile: ts.SourceFile): OutliningSpan[];
         getTodoComments(fileName: string, descriptors: TodoCommentDescriptor[]): TodoComment[];
         getBraceMatchingAtPosition(fileName: string, position: number): TextSpan[];
         getIndentationAtPosition(fileName: string, position: number, options: EditorOptions | EditorSettings): number;
