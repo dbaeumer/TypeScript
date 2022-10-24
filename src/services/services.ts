@@ -1632,11 +1632,15 @@ namespace ts {
             return Completions.getCompletionEntrySymbol(program, log, getValidSourceFile(fileName), position, { name, source }, host, preferences);
         }
 
-        function getQuickInfoAtPosition(fileName: string, position: number): QuickInfo | undefined {
-            synchronizeHostData();
+        function getQuickInfoAtPosition(fileName: string, position: number): QuickInfo | undefined;
+        function getQuickInfoAtPosition(node: Node, sourceFile?: SourceFile): QuickInfo | undefined;
+        function getQuickInfoAtPosition(arg0: string | Node, arg1: number | SourceFile | undefined): QuickInfo | undefined {
+             synchronizeHostData();
 
-            const sourceFile = getValidSourceFile(fileName);
-            const node = getTouchingPropertyName(sourceFile, position);
+            const sourceFile: SourceFile = typeof arg0 === "string" ? getValidSourceFile(arg0) : (arg1 !== undefined) ? arg1 as SourceFile : arg0.getSourceFile();
+            const node: Node = typeof arg0 === "string" ? getTouchingPropertyName(sourceFile, arg1 as number) : arg0;
+            const position: number = typeof arg1 === "number" ? arg1 : node.getStart(sourceFile, false);
+
             if (node === sourceFile) {
                 // Avoid giving quickInfo for the sourceFile as a whole.
                 return undefined;
@@ -1933,11 +1937,13 @@ namespace ts {
             return ts.getEncodedSyntacticClassifications(cancellationToken, syntaxTreeCache.getCurrentSourceFile(fileName), span);
         }
 
-        function getOutliningSpans(fileName: string): OutliningSpan[] {
-            // doesn't use compiler - no need to synchronize with host
-            const sourceFile = syntaxTreeCache.getCurrentSourceFile(fileName);
+        function getOutliningSpans(fileName: string): OutliningSpan[];
+        function getOutliningSpans(sourceFile: SourceFile): OutliningSpan[];
+        function getOutliningSpans(arg0: string | SourceFile): OutliningSpan[] {
+             // doesn't use compiler - no need to synchronize with host
+            const sourceFile = typeof arg0 === "string" ? syntaxTreeCache.getCurrentSourceFile(arg0) : arg0;
             return OutliningElementsCollector.collectElements(sourceFile, cancellationToken);
-        }
+         }
 
         const braceMatching = new Map(getEntries({
             [SyntaxKind.OpenBraceToken]: SyntaxKind.CloseBraceToken,

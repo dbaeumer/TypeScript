@@ -155,6 +155,7 @@ namespace ts {
         getCompletionEntryDetails(fileName: string, position: number, entryName: string, formatOptions: string/*Services.FormatCodeOptions*/ | undefined, source: string | undefined, preferences: UserPreferences | undefined, data: CompletionEntryData | undefined): string;
 
         getQuickInfoAtPosition(fileName: string, position: number): string;
+        getQuickInfoAtPosition(node: Node, sourceFile?: SourceFile | undefined): string;
 
         getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): string;
         getBreakpointStatementAtPosition(fileName: string, position: number): string;
@@ -251,7 +252,7 @@ namespace ts {
          * Returns a JSON-encoded value of the type:
          * { textSpan: { start: number, length: number }; hintSpan: { start: number, length: number }; bannerText: string; autoCollapse: boolean } [] = [];
          */
-        getOutliningSpans(fileName: string): string;
+        getOutliningSpans(fileNameOrSourceFile: string | SourceFile): string;
 
         getTodoComments(fileName: string, todoCommentDescriptors: string): string;
 
@@ -764,12 +765,16 @@ namespace ts {
          * Computes a string representation of the type at the requested position
          * in the active file.
          */
-        public getQuickInfoAtPosition(fileName: string, position: number): string {
-            return this.forwardJSONCall(
-                `getQuickInfoAtPosition('${fileName}', ${position})`,
-                () => this.languageService.getQuickInfoAtPosition(fileName, position)
-            );
-        }
+        public getQuickInfoAtPosition(fileName: string, position: number): string;
+        public getQuickInfoAtPosition(node: Node, sourceFile?: SourceFile | undefined): string;
+        public getQuickInfoAtPosition(arg0: string | Node, arg1: number | SourceFile | undefined): string {
+            const fileName = typeof arg0 === "string" ? arg0 : arg1 !== undefined ? (arg1 as SourceFile).fileName : arg0.getSourceFile().fileName;
+            const position = typeof arg0 === "string" ? arg1 as number : arg0.getStart(arg1 as SourceFile);
+             return this.forwardJSONCall(
+                 `getQuickInfoAtPosition('${fileName}', ${position})`,
+                () => this.languageService.getQuickInfoAtPosition(arg0 as any, arg1 as any)
+             );
+         }
 
 
         /// NAMEORDOTTEDNAMESPAN
@@ -1032,12 +1037,13 @@ namespace ts {
             );
         }
 
-        public getOutliningSpans(fileName: string): string {
-            return this.forwardJSONCall(
-                `getOutliningSpans('${fileName}')`,
-                () => this.languageService.getOutliningSpans(fileName)
-            );
-        }
+        public getOutliningSpans(fileNameOrSourceFile: string | SourceFile): string {
+            const fileName = typeof fileNameOrSourceFile === "string" ? fileNameOrSourceFile : fileNameOrSourceFile.fileName;
+             return this.forwardJSONCall(
+                 `getOutliningSpans('${fileName}')`,
+                () => this.languageService.getOutliningSpans(fileNameOrSourceFile as any)
+             );
+         }
 
         public getTodoComments(fileName: string, descriptors: string): string {
             return this.forwardJSONCall(

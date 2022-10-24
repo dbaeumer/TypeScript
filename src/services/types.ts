@@ -448,6 +448,7 @@ namespace ts {
          * @param position A zero-based index of the character where you want the quick info
          */
         getQuickInfoAtPosition(fileName: string, position: number): QuickInfo | undefined;
+        getQuickInfoAtPosition(node: Node, sourceFile?: SourceFile): QuickInfo | undefined;
 
         getNameOrDottedNameSpan(fileName: string, startPos: number, endPos: number): TextSpan | undefined;
 
@@ -483,7 +484,7 @@ namespace ts {
 
         provideInlayHints(fileName: string, span: TextSpan, preferences: UserPreferences | undefined): InlayHint[]
 
-        getOutliningSpans(fileName: string): OutliningSpan[];
+        getOutliningSpans(fileNameOrSourceFile: string | SourceFile): OutliningSpan[];
         getTodoComments(fileName: string, descriptors: TodoCommentDescriptor[]): TodoComment[];
         getBraceMatchingAtPosition(fileName: string, position: number): TextSpan[];
         getIndentationAtPosition(fileName: string, position: number, options: EditorOptions | EditorSettings): number;
