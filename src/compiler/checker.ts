@@ -395,6 +395,9 @@ namespace ts {
         // extra cost of calling `getParseTreeNode` when calling these functions from inside the
         // checker.
         const checker: TypeChecker = {
+            setSymbolChainCache: (cache: SymbolChainCache | undefined): void => {
+                nodeBuilder.setSymbolChainCache(cache);
+            },
             getNodeCount: () => sum(host.getSourceFiles(), "nodeCount"),
             getIdentifierCount: () => sum(host.getSourceFiles(), "identifierCount"),
             getSymbolCount: () => sum(host.getSourceFiles(), "symbolCount") + symbolCount,
@@ -4901,7 +4904,9 @@ namespace ts {
         }
 
         function createNodeBuilder() {
+            let symbolChainCache: SymbolChainCache | undefined;
             return {
+                setSymbolChainCache: (cache: SymbolChainCache | undefined): void => { symbolChainCache = cache },
                 typeToTypeNode: (type: Type, enclosingDeclaration?: Node, flags?: NodeBuilderFlags, tracker?: SymbolTracker) =>
                     withContext(enclosingDeclaration, flags, tracker, context => typeToTypeNodeHelper(type, context)),
                 indexInfoToIndexSignatureDeclaration: (indexInfo: IndexInfo, enclosingDeclaration?: Node, flags?: NodeBuilderFlags, tracker?: SymbolTracker) =>
@@ -4942,6 +4947,7 @@ namespace ts {
                         readFile: host.readFile ? (fileName => host.readFile!(fileName)) : undefined,
                     } : undefined },
                     encounteredError: false,
+                    cache: symbolChainCache,
                     reportedDiagnostic: false,
                     visitedTypes: undefined,
                     symbolDepth: undefined,
@@ -6146,6 +6152,30 @@ namespace ts {
 
                 /** @param endOfChain Set to false for recursive calls; non-recursive calls should always output something. */
                 function getSymbolChain(symbol: Symbol, meaning: SymbolFlags, endOfChain: boolean): Symbol[] | undefined {
+                    let key: SymbolChainCacheKey | undefined;
+                    let result: Symbol[] | undefined;
+                    if (context.cache) {
+                        key = {
+                            symbol,
+                            enclosingDeclaration: context.enclosingDeclaration,
+                            flags: context.flags,
+                            meaning: meaning,
+                            yieldModuleSymbol: yieldModuleSymbol,
+                            endOfChain: endOfChain
+                        }
+                        result = context.cache.lookup(key);
+                        if (result) {
+                            return result;
+                        }
+                    }
+                    result = doGetSymbolChain(symbol, meaning, endOfChain);
+                    if (result && key && context.cache) {
+                        context.cache.cache(key, result);
+                    }
+                    return result;
+                }
+
+                function doGetSymbolChain(symbol: Symbol, meaning: SymbolFlags, endOfChain: boolean): Symbol[] | undefined {
                     let accessibleSymbolChain = getAccessibleSymbolChain(symbol, context.enclosingDeclaration, meaning, !!(context.flags & NodeBuilderFlags.UseOnlyExternalAliasing));
                     let parentSpecifiers: (string | undefined)[];
                     if (!accessibleSymbolChain ||
@@ -8423,6 +8453,7 @@ namespace ts {
             enclosingDeclaration: Node | undefined;
             flags: NodeBuilderFlags;
             tracker: SymbolTracker;
+            cache: SymbolChainCache | undefined;
 
             // State
             encounteredError: boolean;

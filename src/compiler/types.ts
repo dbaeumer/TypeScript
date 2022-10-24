@@ -4359,7 +4359,22 @@ namespace ts {
         readonly redirectTargetsMap: RedirectTargetsMap;
     }
 
+    export interface SymbolChainCacheKey {
+        symbol: Symbol;
+        enclosingDeclaration?: Node;
+        flags: NodeBuilderFlags;
+        meaning: SymbolFlags;
+        yieldModuleSymbol?: boolean;
+        endOfChain: boolean;
+    }
+
+    export interface SymbolChainCache {
+        lookup(key: SymbolChainCacheKey): Symbol[] | undefined;
+        cache(key: SymbolChainCacheKey, value: Symbol[]): void;
+    }
+
     export interface TypeChecker {
+        setSymbolChainCache(cache: SymbolChainCache | undefined): void;
         getTypeOfSymbolAtLocation(symbol: Symbol, node: Node): Type;
         /* @internal */ getTypeOfSymbol(symbol: Symbol): Type;
         getDeclaredTypeOfSymbol(symbol: Symbol): Type;
