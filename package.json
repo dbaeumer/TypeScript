@@ -1,10 +1,10 @@
 {
-    "name": "typescript",
+    "name": "lsif-typescript",
     "author": "Microsoft Corp.",
     "homepage": "https://www.typescriptlang.org/",
-    "version": "4.8.4",
+    "version": "4.8.4-lsif.1",
     "license": "Apache-2.0",
-    "description": "TypeScript is a language for application scale JavaScript development",
+    "description": "A special version of the Typescript libraries to support LSIF (https://microsoft.github.io/language-server-protocol/specifications/lsif/0.6.0/specification/)",
     "keywords": [
         "TypeScript",
         "Microsoft",
