@@ -2461,6 +2461,15 @@ export function createLanguageService(
         return FindAllReferences.findReferencedSymbols(program, cancellationToken, program.getSourceFiles(), getValidSourceFile(fileName), position);
     }
 
+    function findReferencesIterable(fileName: string, position: number): IterableIterator<ReferencedSymbol> | undefined {
+        synchronizeHostData();
+        const references = findReferences(fileName, position);
+        if (references === undefined) {
+            return undefined;
+        }
+        return references[Symbol.iterator]();
+    }
+
     function getFileReferences(fileName: string): ReferenceEntry[] {
         synchronizeHostData();
         return FindAllReferences.Core.getReferencesForFileName(fileName, program, program.getSourceFiles()).map(FindAllReferences.toReferenceEntry);
