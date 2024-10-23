@@ -137,6 +137,7 @@ import {
     unmangleScopedPackageName,
     version,
     WithMetadata,
+    type LanguageService,
 } from "./_namespaces/ts.js";
 import {
     AuxiliaryProject,
@@ -1094,6 +1095,22 @@ export class Session<TMessage = string> implements EventSender {
             default:
                 Debug.assertNever(this.projectService.serverMode);
         }
+    }
+
+    public getLanguageServices(sourceFile?: SourceFile): LanguageService[] {
+        // If we have a source file return all language services that include
+        // that source file
+        if (sourceFile) {
+            const file = toNormalizedPath(sourceFile.fileName);
+            const scriptInfo = this.projectService.getScriptInfoForNormalizedPath(file)!;
+            return scriptInfo ? scriptInfo.containingProjects.map(p => p.getLanguageService()) : [];
+        }
+        // Otherwise return all language services.
+        const result: LanguageService[] = [];
+        this.projectService.forEachProject(project => {
+            result.push(project.getLanguageService());
+        });
+        return result;
     }
 
     private sendRequestCompletedEvent(requestId: number, performanceData: PerformanceData | undefined): void {

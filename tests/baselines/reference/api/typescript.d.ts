@@ -3475,6 +3475,7 @@ declare namespace ts {
             private eventHandler;
             private readonly noGetErrOnBackgroundUpdate?;
             constructor(opts: SessionOptions);
+            getLanguageServices(sourceFile?: SourceFile): LanguageService[];
             private sendRequestCompletedEvent;
             private addPerformanceData;
             private addDiagnosticsPerformanceData;
